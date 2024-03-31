@@ -9,7 +9,6 @@ import ReactPlayer from "react-player";
 const Page = () => {
   const params = useParams();
   const { myStream } = useMediaStream();
-
   const roomId = params.roomId as string;
 
   useEffect(() => {

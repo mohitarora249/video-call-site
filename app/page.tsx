@@ -5,19 +5,37 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ROOM_ID_LENGTH } from "@/constants";
-import { useState } from "react";
+import { useGlobalContext } from "@/context/global-context";
+import { nanoid, customAlphabet } from "nanoid";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const Home = () => {
   const [roomId, setRoomId] = useState("");
   const onChange = (v: string) => setRoomId(v);
-  const handleJoinRoom = () => {
-    // check input
-    // if valid, join room on server, redirect user to that room
-    // else show error
+  const { push } = useRouter();
+  const { socket } = useGlobalContext();
+
+  const handledJoinedRoom = ({ roomId }: { roomId: string }) => {
+    push(`/${roomId}`);
   };
+
+  useEffect(() => {
+    socket?.on("joined:room", handledJoinedRoom);
+  }, [socket]);
+
+  const handleJoinRoom = () => {
+    socket?.emit("join:room", {
+      userId: nanoid(),
+      roomId,
+    });
+  };
+
   const handleCreateRoom = () => {
-    // create room on server
-    // redirect to that room
+    socket?.emit("create:room", {
+      userId: nanoid(),
+      roomId: customAlphabet("0123456789", ROOM_ID_LENGTH)(),
+    });
   };
 
   return (
