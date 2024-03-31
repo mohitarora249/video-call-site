@@ -1,4 +1,5 @@
 "use client";
+import { useWebRTC } from "@/contexts/web-rtc-provider";
 import { useCallback, useEffect, useState } from "react";
 
 /**
@@ -9,11 +10,11 @@ import { useCallback, useEffect, useState } from "react";
 const useMediaStream = () => {
   const [myStream, setMyStream] = useState<MediaStream | null>(null);
   const getUserMediaStream = useCallback(async () => {
-    const steram = await navigator.mediaDevices.getUserMedia({
+    const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     });
-    setMyStream(steram);
+    setMyStream(stream);
   }, []);
 
   useEffect(() => {

@@ -22,6 +22,9 @@ const Home = () => {
 
   useEffect(() => {
     socket?.on("joined:room", handledJoinedRoom);
+    return () => {
+      socket?.off("joined:room", handledJoinedRoom);
+    };
   }, [socket]);
 
   const handleJoinRoom = () => {

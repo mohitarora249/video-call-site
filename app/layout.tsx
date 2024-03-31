@@ -1,5 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { GlobalProvider } from "@/context/global-context";
+import { WebRTCProvider } from "@/contexts/web-rtc-provider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -19,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <GlobalProvider>{children}</GlobalProvider>
+        <GlobalProvider>
+          <WebRTCProvider>{children}</WebRTCProvider>
+        </GlobalProvider>
       </body>
       <Toaster />
     </html>
