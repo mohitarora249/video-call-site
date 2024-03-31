@@ -1,15 +1,23 @@
 "use client";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo } from "react";
+import { Socket, io } from "socket.io-client";
 
-type GlobalContextType = {};
+type GlobalContextType = { socket: Socket | null };
 
-const initialContext: GlobalContextType = {};
+const initialContext: GlobalContextType = {
+  socket: null,
+};
 
 const GlobalContext = createContext<GlobalContextType>(initialContext);
 
-// Create a provider component
 export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
-  return <GlobalContext.Provider value={{}}>{children}</GlobalContext.Provider>;
+  const socket = useMemo(() => io("localhost:8000"), []);
+
+  return (
+    <GlobalContext.Provider value={{ socket }}>
+      {children}
+    </GlobalContext.Provider>
+  );
 };
 
 // Custom hook to consume the context
