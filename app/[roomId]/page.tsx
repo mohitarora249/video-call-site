@@ -31,36 +31,33 @@ const Page = () => {
       setRemoteUserId(userId);
       socket?.emit("call:user", { userId, offer });
     },
-    []
+    [createOffer, socket]
   );
 
   const handleIncomingCall = useCallback(
-    async ({
-      from,
-      offer,
-    }: {
-      from: string;
-      offer: RTCSessionDescriptionInit;
-    }) => {
+    async ({ offer, from }: any) => {
+      console.log("handleIncomingCall : ");
+      // console.log("from : ", from);
       const ans = await createAnswer(offer);
+      console.log("ans : ", ans);
       setRemoteUserId(from);
       socket?.emit("call:accepted", { from, answer: ans });
     },
-    []
+    [createAnswer, socket]
   );
 
   const handleCallAccepted = useCallback(
     async ({ answer }: { answer: RTCSessionDescriptionInit }) => {
       await setRemoteDescription(answer);
     },
-    []
+    [setRemoteDescription]
   );
 
-  const handleNegotiationNeededEvent = async () => {
+  const handleNegotiationNeededEvent = useCallback(async () => {
     const offer = peer?.localDescription;
-    console.log("handleNegotiationNeededEvent : ", remoteUserId);
-    socket?.emit("call:user", { userId: remoteUserId, offer });
-  };
+    console.log("handleNegotiationNeededEvent : ", offer);
+    socket?.emit("call:user", { userId: "joiner", offer, roomId });
+  }, [peer?.localDescription, remoteUserId, socket]);
 
   useEffect(() => {
     peer?.addEventListener("negotiationneeded", handleNegotiationNeededEvent);
@@ -74,8 +71,13 @@ const Page = () => {
   }, []);
 
   useEffect(() => {
-    socket?.on("user:joined", handleUserJoined);
+    console.log("remoteUserId : ", remoteUserId);
+    console.log("handleIncomingCall : ", handleIncomingCall);
+  }, [remoteUserId, handleIncomingCall]);
+
+  useEffect(() => {
     socket?.on("incoming:call", handleIncomingCall);
+    socket?.on("user:joined", handleUserJoined);
     socket?.on("call:accepted", handleCallAccepted);
 
     return () => {
@@ -83,7 +85,7 @@ const Page = () => {
       socket?.off("incoming:call", handleIncomingCall);
       socket?.off("call:accepted", handleCallAccepted);
     };
-  }, [socket]);
+  }, [socket, handleIncomingCall, handleUserJoined, handleCallAccepted]);
 
   useEffect(() => {
     if (roomId && roomId.length !== ROOM_ID_LENGTH) {
@@ -93,8 +95,10 @@ const Page = () => {
 
   return (
     <div className="flex h-screen flex-col relative">
+      you are connected to {remoteUserId}
       <Button
         onClick={() => {
+          console.log("STARTED");
           if (myStream) sendStream(myStream);
         }}
       >

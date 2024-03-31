@@ -25,18 +25,20 @@ const Home = () => {
     return () => {
       socket?.off("joined:room", handledJoinedRoom);
     };
-  }, [socket]);
+  }, [socket, handledJoinedRoom]);
 
   const handleJoinRoom = () => {
     socket?.emit("join:room", {
-      userId: nanoid(),
+      // userId: nanoid(),
+      userId: "joiner",
       roomId,
     });
   };
 
   const handleCreateRoom = () => {
-    socket?.emit("create:room", {
-      userId: nanoid(),
+    socket?.emit("join:room", {
+      // userId: nanoid(),
+      userId: "creator",
       roomId: customAlphabet("0123456789", ROOM_ID_LENGTH)(),
     });
   };

@@ -21,4 +21,10 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Custom hook to consume the context
-export const useGlobalContext = () => useContext(GlobalContext);
+export const useGlobalContext = () => {
+  const context = useContext(GlobalContext);
+  if (context === null) {
+    throw new Error("useGlobalContext must be used within a GlobalProvider");
+  }
+  return context;
+};

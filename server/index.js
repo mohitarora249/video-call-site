@@ -17,7 +17,7 @@ const socketIdToUserIdMap = new Map();
 io.on("connection", (socket) => {
   socket.on("join:room", (data) => {
     const { roomId, userId } = data;
-    console.log("join:room | ", userId);
+    console.log("join:room | ", { userId, roomId });
     socket.join(roomId);
     userIdToSocketIdMap.set(userId, socket.id);
     socketIdToUserIdMap.set(socket.id, userId);
@@ -26,11 +26,9 @@ io.on("connection", (socket) => {
     });
     socket.emit("joined:room", {
       roomId,
+      userId,
     });
-    console.log("=====================");
     console.log("userIdToSocketIdMap : ", userIdToSocketIdMap);
-    console.log("socketIdToUserIdMap : ", socketIdToUserIdMap);
-    console.log("=====================");
   });
   socket.on("create:room", (data) => {
     const { roomId, userId } = data;
@@ -38,38 +36,39 @@ io.on("connection", (socket) => {
     socket.join(roomId);
     userIdToSocketIdMap.set(userId, socket.id);
     socketIdToUserIdMap.set(socket.id, userId);
-    socket.emit("joined:room", {
-      roomId,
+    socket.broadcast.to(roomId).emit("user:joined", {
       userId,
     });
-    console.log("=====================");
     console.log("userIdToSocketIdMap : ", userIdToSocketIdMap);
-    console.log("socketIdToUserIdMap : ", socketIdToUserIdMap);
-    console.log("=====================");
   });
   socket.on("call:user", (data) => {
-    const { userId, offer } = data;
-    console.log("call:user | ", userId);
-    const socketId = userIdToSocketIdMap.get(userId);
-    socket.to(socketId).emit("incoming:call", {
-      from: socketIdToUserIdMap.get(socket.id),
-      offer,
-    });
-    console.log("=====================");
+    try {
+      const { userId, offer } = data;
+      console.log("call:user | ", userId);
+      const socketId = userIdToSocketIdMap.get(userId);
+      console.log("socketId : ", socketId);
+      console.log("emitting - incoming:call");
+      console.log("from : ", {
+        from: socketIdToUserIdMap.get(socket.id),
+        offer,
+      });
+      io.to(socketId).emit("incoming:call", {
+        from: socketIdToUserIdMap.get(socket.id),
+        offer,
+      });
+      console.log("AFTER");
+    } catch (err) {
+      console.log(err);
+    }
     console.log("userIdToSocketIdMap : ", userIdToSocketIdMap);
-    console.log("socketIdToUserIdMap : ", socketIdToUserIdMap);
-    console.log("=====================");
   });
   socket.on("call:accepted", (data) => {
     const { userId, answer } = data;
     console.log("call:accepted | ", userId);
     const socketId = userIdToSocketIdMap.get(userId);
-    socket.to(socketId).emit("call:accepted", {
+    io.to(socketId).emit("call:accepted", {
       answer,
     });
-    console.log("=====================");
     console.log("userIdToSocketIdMap : ", userIdToSocketIdMap);
-    console.log("socketIdToUserIdMap : ", socketIdToUserIdMap);
-    console.log("=====================");
   });
 });
